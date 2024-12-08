@@ -8,6 +8,7 @@ GoogleService-Info.plist
 
 ## Obj-C/Swift specific
 *.hmap
+*.DSStore
 
 ## App packaging
 *.ipa

@@ -6,12 +6,23 @@
 //
 
 import SwiftUI
+import FirebaseCore
+
 
 @main
 struct BitBattlesApp: App {
+    init() {
+        FirebaseApp.configure()
+        let authManager = AuthManager()
+              _authManager = StateObject(wrappedValue: authManager)
+    }
+        
+    @StateObject var authManager: AuthManager
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LaunchView()
+                .environmentObject(authManager)
         }
     }
 }

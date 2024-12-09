@@ -6,6 +6,7 @@
 //
 
 import GoogleSignIn
+import FirebaseCore
 
 class GoogleSignInManager {
     static let shared = GoogleSignInManager()
@@ -26,6 +27,11 @@ class GoogleSignInManager {
                 let rootViewController = windowScene.windows.first?
                     .rootViewController
             else { return nil }
+
+            guard let clientID = FirebaseApp.app()?.options.clientID else { return nil }
+            let config = GIDConfiguration(clientID: clientID)
+
+            GIDSignIn.sharedInstance.configuration = config
 
             let result = try await GIDSignIn.sharedInstance.signIn(
                 withPresenting: rootViewController)

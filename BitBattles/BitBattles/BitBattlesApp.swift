@@ -7,7 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
-
+import GoogleSignIn
 
 @main
 struct BitBattlesApp: App {

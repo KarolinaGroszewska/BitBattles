@@ -11,74 +11,63 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthManager
-    @State private var showSignUpView = false
+    @State private var showHomeView = false
+
     var body: some View {
         NavigationStack{
-            VStack {
-                Image("loginImage")
-                    .resizable()
-                    .frame(width: 320, height: 320, alignment: .center)
-                //TODO: Change the hover color of the two buttons to match
-                Button {
-                    Task {
-                        await signInWithGoogle()
-                    }
-                } label: {
-                    HStack {
-                        Text("Sign in with ")
-                            .font(.system(size: 20))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.black)
+            ZStack {
+                Color(red: 217/255, green: 244/255, blue: 241/255)
+                    .ignoresSafeArea()
+                VStack {
+                    Text("BitBattles")
+                        .monospaced()
+                        .fontWeight(.semibold)
+                        .font(.system(size: 24))
+                        .padding(.top, 25)
+                        .foregroundStyle(Color.black)
+                    Image("loginImage")
+                        .resizable()
+                        .frame(width: 320, height: 320, alignment: .center)
+                    Button {
+                        Task {
+                            await signInWithGoogle()
+                        }
+                    } label: {
+                        HStack {
+                            Text("Sign in with ")
+                                .font(.system(size: 20))
+                                .fontWeight(.medium)
+                                .foregroundStyle(.black)
+                            
+                            Image("googleLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 20)
+                        }
+                        .frame(width: 220.5, height: 48.5)
+                        .background(.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5).stroke(Color(red: 43/255, green: 43/255, blue: 43/255), lineWidth: 0.75))
                         
-                        Image("googleLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 20)
                     }
-                    .frame(width: 220.5, height: 48.5)
-                    .background(.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5).stroke(Color(red: 43/255, green: 43/255, blue: 43/255), lineWidth: 0.75))
+                    SignInWithAppleButton(
+                        onRequest: { request in
+                            AppleSignInManager.shared.requestAppleAuthorization(request)
+                        },
+                        onCompletion: { result in
+                            handleAppleID(result)
+                        }
+                    )
+                    .frame(width: 222, height: 50)
+                    .signInWithAppleButtonStyle(.whiteOutline)
+                    .padding(.bottom, 40)
                     
                 }
-                SignInWithAppleButton(
-                    onRequest: { request in
-                        AppleSignInManager.shared.requestAppleAuthorization(request)
-                    },
-                    onCompletion: { result in
-                        handleAppleID(result)
-                    }
-                )
-                .frame(width: 222, height: 50)
-                .signInWithAppleButtonStyle(.whiteOutline)
-                .padding(.bottom, 50)
-                Text("New to BitBattles?")
-                    .font(.system(size: 12))
-                    .monospaced()
-                Button {
-                    showSignUpView = true
-                } label: {
-                    HStack {
-                        Text("Register")
-                            .font(.system(size: 20))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.black)
-                    }
-                    .frame(width: 220.5, height: 38.5)
-                    .background(.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5).stroke(Color(red: 43/255, green: 43/255, blue: 43/255), lineWidth: 0.75))
-                    .padding(.bottom, 30)
+                .navigationDestination(isPresented: $showHomeView) {
+                    HomeView()
+                        .navigationBarBackButtonHidden(true)
                 }
             }
-            .navigationDestination(isPresented: $showSignUpView) {
-                SignUpView()
-                    .navigationBarBackButtonHidden(true)
-            }
-            .background(Color(red: 217/255, green: 244/255, blue: 241/255)
-                .ignoresSafeArea(.all)
-            )
-            
         }
     }
     func signInWithGoogle() async {
@@ -91,6 +80,7 @@ struct LoginView: View {
             let result = try await authManager.googleAuth(user)
             if let result = result {
                 print("GoogleSignInSuccess: \(result.user.uid)")
+                showHomeView = true
             }
         } catch {
             print("GoogleSignInError: failed to sign in with Google, \(error)")
@@ -115,8 +105,8 @@ struct LoginView: View {
                         appleIDCredentials,
                         nonce: AppleSignInManager.nonce
                     )
-                    if let result = result {
-                        //                        HomeView()
+                    if result != nil {
+                        showHomeView = true
                     }
                 } catch {
                     print("AppleAuthorization failed: \(error)")
@@ -124,7 +114,6 @@ struct LoginView: View {
             }
         } else if case let .failure(error) = result {
             print("AppleAuthorization failed: \(error)")
-            // Here you can show error message to user.
         }
     }
     

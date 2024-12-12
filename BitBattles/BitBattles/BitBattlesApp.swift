@@ -23,6 +23,7 @@ struct BitBattlesApp: App {
         WindowGroup {
             LaunchView()
                 .environmentObject(authManager)
+                .preferredColorScheme(.light)
         }
     }
 }

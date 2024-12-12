@@ -15,7 +15,7 @@ struct LaunchView: View {
     var body: some View {
         VStack {
             if authManager.authState != .signedOut {
-                HomeView()
+                ProfileView()
             } else {
                 LoginView()
             }

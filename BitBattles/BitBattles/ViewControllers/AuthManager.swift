@@ -8,6 +8,7 @@
 import AuthenticationServices
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 import GoogleSignIn
 
 enum AuthState {
@@ -38,12 +39,26 @@ class AuthManager: ObservableObject {
     func updateState(user: User?) {
         self.user = user
         let isAuthenticatedUser = user != nil
-        let isAnonymous = user?.isAnonymous ?? false
         
         if isAuthenticatedUser {
-            self.authState = isAnonymous ? .authenticated : .signedIn
+            self.authState = .signedIn
         } else {
             self.authState = .signedOut
+        }
+    }
+    
+    func updateFirestore(user: User?) async throws {
+        self.user = user
+        do {
+            let db = Firestore.firestore()
+            let ref = try await db.collection("users").document(user?.uid ?? "").setData([
+                "displayName": user?.providerData.first?.displayName ?? "",
+                "email" : user?.providerData.first?.email ?? "",
+//                "photo": user?.providerData.first?.photoURL as URL ?? nil
+            ])
+        }
+        catch {
+            print("Error adding document: \(error)")
         }
     }
     
@@ -130,6 +145,9 @@ class AuthManager: ObservableObject {
         do {
             let result = try await Auth.auth().signIn(with: credentials)
             updateState(user: result.user)
+            if result.user.metadata.creationDate?.timeIntervalSince1970 == result.user.metadata.lastSignInDate?.timeIntervalSince1970 {
+                try await updateFirestore(user: result.user)
+            }
             return result
         }
         catch {

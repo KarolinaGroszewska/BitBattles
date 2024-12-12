@@ -6,8 +6,11 @@
 //
 
 import AuthenticationServices
+import FirebaseCore
+import FirebaseFirestore
 import GoogleSignInSwift
 import SwiftUI
+
 
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -64,7 +67,7 @@ struct LoginView: View {
                     
                 }
                 .navigationDestination(isPresented: $showHomeView) {
-                    HomeView()
+                    ProfileView()
                         .navigationBarBackButtonHidden(true)
                 }
             }
